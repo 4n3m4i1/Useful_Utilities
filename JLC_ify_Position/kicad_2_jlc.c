@@ -8,10 +8,10 @@
 #include <inttypes.h>
 #include <malloc.h>
 
-#define TMP_LEN     256
+#define TMP_LEN     512
 
-const char jlc_pos_hdr[] = "\"Designator\",\"Val\",\"Package\",\"Mid X\",\"Mid Y\",\"Rotation,Layer\"\n";
-const char jlc_bom_hdr[] = "\"Qty\",\"Value\",\"Footprint\",\"LCSC Part Number\"\n";
+const char jlc_pos_hdr[] = "\"Designator\",\"Val\",\"Package\",\"Mid X\",\"Mid Y\",\"Rotation\",\"Layer\"\n";
+const char jlc_bom_hdr[] = "\"Designator\",\"Qty\",\"Value\",\"Footprint\",\"LCSC Part Number\"\n";
 
 #define ARG_CHAR    '-'
 #define DELIMITER   ','
@@ -75,6 +75,12 @@ int diy_readline(FILE *fp, char *retstr, int *rlen){
     }
 }
 
+void zero_tmp(char *tmp){
+    if(tmp){
+        for(int n = 0; n < TMP_LEN; ++n) tmp[n] = 0x00;
+    }
+}
+
 void main(int argc, char **argv){
     char tmp[TMP_LEN] = {0x00};
 
@@ -86,6 +92,7 @@ void main(int argc, char **argv){
 
     if(argc > 1){
         for(int n = 1; n < argc; ++n){
+            zero_tmp(tmp);
             switch(hasher(argv[n])){
                 case ARG_pos:
                 case ARG_POS:
@@ -128,11 +135,11 @@ void main(int argc, char **argv){
 
                             fgets(tmp, TMP_LEN, fp);
                             skip_col(fp); // skip #
-                            skip_col(fp); // skip Designator
+                            //skip_col(fp); // skip Designator
                             while(fgets(tmp, TMP_LEN, fp)){
                                 fputs(tmp, opfp);
                                 skip_col(fp);
-                                skip_col(fp);
+                                //skip_col(fp);
                             }
 
                             fclose(opfp);
