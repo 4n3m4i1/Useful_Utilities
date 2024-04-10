@@ -15,12 +15,15 @@ union DispType {
     uint64_t ival;
 };
 
-void print_bin8(uint64_t val);
-void print_bin16(uint64_t val);
-void print_bin32(uint64_t val);
-void print_bin64(uint64_t val);
+void print_bin8(uint64_t val, uint8_t radix);
+void print_bin16(uint64_t val, uint8_t radix);
+void print_bin32(uint64_t val, uint8_t radix);
+void print_bin64(uint64_t val, uint8_t radix);
 
 double input;
+
+uint8_t int_len = 0;
+uint8_t frac_len;
 
 void main(int argc, char **argv){
     uint16_t arg_w_val = 1;
@@ -67,10 +70,45 @@ void main(int argc, char **argv){
                         }
                     break;
 
+                    case 'f':
+                    case 'F':
+                        if(n < (argc - 2)){
+                            int_len = (uint8_t)strtoul(argv[++n], NULL, 10);
+                            frac_len = (uint8_t)strtoul(argv[++n], NULL, 10);
+
+                            switch(int_len){
+                                case 8:
+                                break;
+                                case 16:
+                                break;
+                                case 32:
+                                break;
+                                case 64:
+                                break;
+                                default:
+                                    printf("Nonstandard Int Length!\n");
+                                    return;
+                                break;
+                            }
+
+                            if(frac_len >= int_len){
+                                printf("Fractional Length Greater Than Integer Length!\n");
+                                return;
+                            }
+
+                            arg_w_val += 3;
+                        } else {
+                            printf("Incorrect Fixed Point I.F Format Entered!\n");
+                            return;
+                        }
+
+                    break;
+
                     case '-':
                         printf("Quick Converter Help\n");
                         printf("-b\t\tPrints Binary Output\n");
                         printf("-l {8,16,32,64}\tSpecifies Length of Output Data, Default: 32\n");
+                        printf("-f {TypeLen} {Frac Bits}\tFixed Point Radix Converter\n");
                         printf("Bye!\n");
                         return;
                     break;
@@ -80,6 +118,25 @@ void main(int argc, char **argv){
         
         if(!(print_options & PRINT_LEN)) print_options |= PRINT_32;
 
+        // fixed point overrides print option of length
+        if(int_len){
+            print_options &= ~(PRINT_LEN);
+            switch(int_len){
+                case 8:
+                    print_options |= PRINT_8;
+                case 16:
+                    print_options |= PRINT_16;
+                break;
+
+                case 32:
+                    print_options |= PRINT_32;
+                break;
+
+                case 64:
+                    print_options |= PRINT_64;
+                break;
+            }
+        }
         
         char *strpt;
 
@@ -158,62 +215,96 @@ void main(int argc, char **argv){
             if(print_options & PRINT_64){
                 printf("Double Binary\t");
                 uint64_t *aahh = (uint64_t *)&input;
-                print_bin64(*aahh);
+                print_bin64(*aahh, 0);
             } else {
                 float ppp = (float)input;
                 uint64_t *aahh = (uint64_t *)&ppp;
                 printf("Float Binary\t");
-                print_bin32(*aahh);
+                print_bin32(*aahh, 0);
             }
             
             printf("\nInt Binary\t");
             switch(print_options & PRINT_LEN){
             case PRINT_8:
-                print_bin8(in_int);
+                print_bin8(in_int, int_len);
             break;
             case PRINT_16:
-                print_bin16(in_int);
+                print_bin16(in_int, int_len);
             break;
             case PRINT_32:
-                print_bin32(in_int);
+                print_bin32(in_int, int_len);
             break;
             case PRINT_64:
-                print_bin64(in_int);
+                print_bin64(in_int, int_len);
             break;
         }
             printf("\n");
         }
 
+        if(int_len){
+            printf("\nQ%u.%u Fixed Point:\n", int_len, frac_len);
+            uint64_t radix = (1u << frac_len);
+            //double input_mag = (input < 0) ? input * -1.0 : input;
+            //if((input_mag - (double)in_inst) < 0) printf("F:\t%.14lf\n", input / (double)radix);
+            //else {
+                printf("F: %.14lf\n", input / (double)radix);
+                in_int = (int64_t)(((double)radix) * input);
+                printf("S: %10ld\n", in_int);
+                printf("H: ");
+                
+                switch(print_options & PRINT_LEN){
+                    case PRINT_8:
+                        printf("      0x%02X",(uint8_t)in_int);
+                    break;
+                    case PRINT_16:
+                        printf("    0x%04X",(uint16_t)in_int);
+                    break;
+                    case PRINT_32:
+                        printf("0x%08lX",(uint32_t)in_int);
+                    break;
+                    case PRINT_64:
+                        //printf("0x%16llX", in_int);
+                        printf("0x%#018" PRIx64 "",in_int);
+                    break;
+                }
+                printf("\n\n");
+            //}
+        }
+
     }
 }
 
-void print_bin8(uint64_t val){
+void print_bin8(uint64_t val, uint8_t radix){
     printf("0b");
     for(int n = 0; n < 8; n++){
+        if(radix && ((n - 1) == radix)) printf(".");
         if(val & (1 << (7 - n))) printf("1");
         else printf("0");
     }
 }
 
-void print_bin16(uint64_t val){
+void print_bin16(uint64_t val, uint8_t radix){
     printf("0b");
     for(int n = 0; n < 16; n++){
+        if(radix && ((n - 1) == radix)) printf(".");
         if(val & (1 << (15 - n))) printf("1");
         else printf("0");
     }
 }
 
-void print_bin32(uint64_t val){
+void print_bin32(uint64_t val, uint8_t radix){
     printf("0b");
     for(int n = 0; n < 32; n++){
+        if(radix && ((n - 1) == radix)) printf(".");
         if(val & (1 << (31 - n))) printf("1");
         else printf("0");
     }
 }
 
-void print_bin64(uint64_t val){
+void print_bin64(uint64_t val, uint8_t radix){
     printf("0b");
     for(unsigned int n = 0; n < 64; n++){
+        if(radix && ((n - 1) == radix)) printf(".");
         if(val & (1llu << (63 - n))) printf("1");
         else printf("0");
     }
