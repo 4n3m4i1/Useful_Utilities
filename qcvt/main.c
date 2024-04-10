@@ -205,7 +205,7 @@ void main(int argc, char **argv){
                     printf("0x%#018" PRIx64 "",in_int);
                 break;
             }
-            printf("\n\n");   
+            printf("\n");   
         }
 
 
@@ -250,10 +250,10 @@ void main(int argc, char **argv){
                 uint8_t hasfrac = 0;
 
                 if(input - (double)in_inst){
-                    printf("HasFrac\n");
+                    //printf("HasFrac\n");
                     hasfrac = 1;
                 } else {
-                    printf("NoFrac\n");
+                    //printf("NoFrac\n");
                 }
                 
                 switch(print_options & PRINT_LEN){
@@ -312,11 +312,12 @@ void main(int argc, char **argv){
                     }
                     break;
                 }
-                printf("\n\n");
+                printf("\n");
             //}
         }
 
     }
+    printf("\n");
 }
 
 void print_bin8(uint64_t val, uint8_t radix){
