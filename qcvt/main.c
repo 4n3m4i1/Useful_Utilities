@@ -127,11 +127,9 @@ void main(int argc, char **argv){
                 case 16:
                     print_options |= PRINT_16;
                 break;
-
                 case 32:
                     print_options |= PRINT_32;
                 break;
-
                 case 64:
                     print_options |= PRINT_64;
                 break;
@@ -247,24 +245,35 @@ void main(int argc, char **argv){
             //double input_mag = (input < 0) ? input * -1.0 : input;
             //if((input_mag - (double)in_inst) < 0) printf("F:\t%.14lf\n", input / (double)radix);
             //else {
-                printf("F: %.14lf\n", input / (double)radix);
                 in_int = (int64_t)(((double)radix) * input);
-                printf("S: %10ld\n", in_int);
-                printf("H: ");
                 
                 switch(print_options & PRINT_LEN){
-                    case PRINT_8:
-                        printf("      0x%02X",(uint8_t)in_int);
+                    case PRINT_8: {
+                        int8_t fl_cvt_back = (int8_t)in_inst;
+                        printf("F:          %.14lf\n", ((double)fl_cvt_back / (double)radix));
+                        printf("S: %10d\n", fl_cvt_back);
+                        printf("H:        0x%02X",(uint8_t)in_inst);
+                    }
                     break;
-                    case PRINT_16:
-                        printf("    0x%04X",(uint16_t)in_int);
+                    case PRINT_16: {
+                        int16_t fl_cvt_back = (int16_t)in_inst;
+                        printf("F:          %.14lf\n", ((double)fl_cvt_back / (double)radix));
+                        printf("S: %10d\n", fl_cvt_back);
+                        printf("H:     0x%04X",(uint16_t)in_inst);
+                    }
                     break;
-                    case PRINT_32:
-                        printf("0x%08lX",(uint32_t)in_int);
+                    case PRINT_32: {
+                        int32_t fl_cvt_back = (int32_t)in_inst;
+                        printf("F:          %.14lf\n", ((double)fl_cvt_back / (double)radix));
+                        printf("S: %10ld\n", fl_cvt_back);
+                        printf("H: 0x%08lX",(uint32_t)in_inst);
+                    }
                     break;
-                    case PRINT_64:
-                        //printf("0x%16llX", in_int);
-                        printf("0x%#018" PRIx64 "",in_int);
+                    case PRINT_64: {
+                        printf("F:          %.14lf\n", ((double)in_inst / (double)radix));
+                        printf("S: %10lld\n", in_inst);
+                        printf("H: 0x%#018" PRIx64 "",in_int);
+                    }
                     break;
                 }
                 printf("\n\n");
